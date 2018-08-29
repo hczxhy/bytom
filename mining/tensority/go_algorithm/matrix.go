@@ -98,10 +98,10 @@ func mulMatrix(headerhash []byte, cache []uint32) []uint8 {
 		}
 	}
 
-	result := make([]uint8, 0)
+	result := make([]uint8, matSize*matSize)
 	for i := 0; i < matSize; i++ {
 		for j := 0; j < matSize; j++ {
-			result = append(result, uint8(tmp[i][j]))
+			result[i*matSize+j] = uint8(tmp[i][j])
 		}
 	}
 	return result
@@ -135,9 +135,9 @@ func hashMatrix(result []uint8) *bc.Hash {
 		}
 	}
 
-	ui32data := make([]uint32, 0)
+	ui32data := make([]uint32, matSize/4)
 	for i := 0; i < matSize/4; i++ {
-		ui32data = append(ui32data, mat32[0][i])
+		ui32data[i] = mat32[0][i]
 	}
 
 	// Convert our destination slice to a byte buffer
