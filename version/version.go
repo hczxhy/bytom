@@ -1,21 +1,28 @@
 package version
 
 import (
+	"sync"
+
 	gover "github.com/hashicorp/go-version"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/fatih/set.v0"
-	"sync"
 )
 
 const (
+	// If needing to edit the iota, please ensure the following:
+	// noUpdate = 0
+	// hasUpdate = 1
+	// hasMUpdate = 2
 	noUpdate uint16 = iota
 	hasUpdate
 	hasMUpdate
+
+	revisionLen = 8 // should falls in [1:16]
 )
 
 var (
 	// The full version string
-	Version = "1.0.4"
+	Version = "1.0.5"
 	// GitCommit is set with --ldflags "-X main.gitCommit=$(git rev-parse HEAD)"
 	GitCommit string
 	Status    *UpdateStatus
@@ -23,7 +30,7 @@ var (
 
 func init() {
 	if GitCommit != "" {
-		Version += "-" + GitCommit[:8]
+		Version += "+" + GitCommit[:revisionLen]
 	}
 	Status = &UpdateStatus{
 		maxVerSeen:    Version,
