@@ -337,12 +337,20 @@ func (m *Manager) GetMiningAddress() (string, error) {
 	return cp.Address, nil
 }
 
-// IsLocalControlProgram check is the input control program belong to local
-func (m *Manager) IsLocalControlProgram(prog []byte) bool {
+// GetControlProgram check is the input control program belong to local
+func (m *Manager) GetCtrlProgramByProg(prog []byte) (*CtrlProgram, error) {
 	var hash common.Hash
 	sha3pool.Sum256(hash[:], prog)
 	bytes := m.db.Get(ContractKey(hash))
-	return bytes != nil
+
+	if bytes != nil {
+		ctrlProg := &CtrlProgram{}
+		if err := json.Unmarshal(bytes, ctrlProg); err != nil {
+			return nil, err
+		}
+		return ctrlProg, nil
+	}
+	return nil, nil
 }
 
 // ListAccounts will return the accounts in the db

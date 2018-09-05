@@ -47,6 +47,7 @@ func (a *API) deleteAccount(ctx context.Context, in AccountInfo) Response {
 type validateAddressResp struct {
 	Valid   bool `json:"valid"`
 	IsLocal bool `json:"is_local"`
+	Change  bool `json:"change"`
 }
 
 // POST /validate-address
@@ -56,6 +57,7 @@ func (a *API) validateAddress(ctx context.Context, ins struct {
 	resp := &validateAddressResp{
 		Valid:   false,
 		IsLocal: false,
+		Change:  false,
 	}
 	address, err := common.DecodeAddress(ins.Address, &consensus.ActiveNetParams)
 	if err != nil {
@@ -77,7 +79,15 @@ func (a *API) validateAddress(ctx context.Context, ins struct {
 	}
 
 	resp.Valid = true
-	resp.IsLocal = a.wallet.AccountMgr.IsLocalControlProgram(program)
+	ctrlProg, err := a.wallet.AccountMgr.GetCtrlProgramByProg(program)
+	if err != nil {
+		return NewErrorResponse(err)
+	}
+
+	if ctrlProg != nil {
+		resp.IsLocal = true
+		resp.Change = ctrlProg.Change
+	}
 	return NewSuccessResponse(resp)
 }
 
